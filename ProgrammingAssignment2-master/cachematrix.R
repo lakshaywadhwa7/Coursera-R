@@ -32,7 +32,7 @@ getInverse=getInverse)
 cacheSolve<-function(x,...)
 {
 inv<-x$getInverse()
- ## if the inverse exists already, is already calculated
+ ## if the inverse exists already
 if(!is.null(inv))
 {
 message("getting cached data")

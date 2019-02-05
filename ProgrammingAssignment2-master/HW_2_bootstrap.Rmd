@@ -1,0 +1,210 @@
+---
+title: "Bootsrap"
+author: "Lakshay_Wadhwa"
+date: "January 19, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+Bootstrap Simulations
+The purpose of this in-class notebook is for you to gain some experience with bootstrap simulations. You are expected to complete all exercises and turn in your work on Canvas (due date to be announced).
+
+Problem #1
+Let's compare the "normal theory" confidence interval to the boostrap confidence interval.
+
+(a) Generate a sample of size ????=45 from an exponential distribution with rate ????=1. Calculate ????¯.
+
+```{r}
+  set.seed(1)
+  s1 = rexp(45,1)
+  
+  X_bar<-mean(s1)
+  X_bar 
+```
+
+(b) Calculate B = 500 bootstrap samples, each of size  ???? . You might do this in a  ????×????  matrix, for example, where each column is a boostrap sample. Then, find the mean of each bootstrap sample, denoted  ????¯??????? , for  ????=1,...,???? .
+
+```{r}
+
+B<-500
+n<-45
+
+bs=replicate(B,sample(s1,n,replace=TRUE))
+bs_mean<-colMeans(bs)
+  
+
+```
+
+(c) Use the quantile() function to find the 2.5th and 97.5th percentile of the distribution of each  ????¯??????? . Use these values to calculate the  95%  boostrap confidence interval for  ???? .
+```{r}
+#95* bootstrap CI
+l=2*X_bar-as.numeric(quantile(bs_mean,0.975))
+u=2*X_bar-as.numeric(quantile(bs_mean,0.025))
+cat("The confidence interval is (",l, ",",u,")")
+
+```
+(d) Compute the appropriate "normal theory" confidence interval for  ????  (learned in STAT/MATH 4520/5520 or STAT 4000/5000).
+
+```{r}
+
+sd_2<-sd(s1)
+
+```
+
+```{r}
+lower_bound<-X_bar-1.96*(sd_2/sqrt(45))
+upper_bound<-X_bar+1.96*(sd_2/sqrt(45))
+```
+
+```{r}
+cat("The confidence interval is (",lower_bound, ",",upper_bound,")")
+```
+
+#####################################################################################3
+Problem #2
+(a) Let  ?????????(????=1,????=1/3) . Generate three random samples each of size  ????=100  from  ???? . Store the samples in objects rsg1, rsg2, and rsg3, respectively.
+
+```{r}
+alpha=1
+beta=1/3
+rsg1<-rgamma(100,shape=alpha,rate=beta)
+rsg2<-rgamma(100,shape=alpha,rate=beta)
+rsg3<-rgamma(100,shape=alpha,rate=beta)
+```
+(b) Generate  ????=104???1  boostrap samples from rsg1, rsg2, and rsg3. A bootstrap sample is a sample of the same size as the original sample taken with replacement.
+(c) Apply the mean to each bootstrap sample and store the means of the bootstrapped samples from rsg1, rsg2, and rsg3 in the objects ThetaHatStar1, ThetaHatStar2, and ThetaHatStar3, respectively.
+```{r}
+B=10^4-1
+n=100
+#ThetaHatStar1<-rep(0,B)
+#ThetaHatStar2<-rep(0,B)
+#ThetaHatStar3<-rep(0,B)
+
+bs1=replicate(B,sample(rsg1,n,replace=TRUE))
+bs2=replicate(B,sample(rsg2,n,replace=TRUE))
+bs3=replicate(B,sample(rsg3,n,replace=TRUE))
+ThetaHatStar1<-colMeans(bs1)
+ThetaHatStar2<-colMeans(bs2)
+ThetaHatStar3<-colMeans(bs3)
+```
+(d) What is the exact sampling distribution of  ????¯ ?
+
+(e) Compute the estimated boostrap bias of  ????¯ ,  ????????????????????^[????¯]=????¯??????????¯  using the values in ThetaHatStar1, ThetaHatStar2, and ThetaHatStar3.
+```{r}
+X_bar1<-mean(rsg1)
+X_bar2<-mean(rsg2)
+X_bar3<-mean(rsg3)
+Bias_X1<-mean(ThetaHatStar1)-X_bar1
+Bias_X2<-mean(ThetaHatStar2)-X_bar2
+Bias_X3<-mean(ThetaHatStar3)-X_bar3
+Bias_X1
+Bias_X2
+Bias_X3
+
+```
+
+
+(f) Compute the estimated bootstrap standard error of  ????¯  using the values in ThetaHatStar1, ThetaHatStar2, and ThetaHatStar3
+
+
+```{r}
+se<-function(x)
+{
+  std_dev<-sd(x)
+  std_error<-std_dev/sqrt(10^4-1)
+}
+```
+
+
+
+```{r}
+std_error1<-se(ThetaHatStar1)
+std_error2<-se(ThetaHatStar2)
+std_error3<-se(ThetaHatStar3)
+std_error1
+std_error2
+std_error3
+```
+
+
+
+
+
+
+
+Problem #3: Bootstrap Confidence Intervals
+
+
+
+Suppose that  ????1,...,????8?????????????????(????,????) . Let's use the bootstrap to compute a  90%  confidence interval for the population standard deviation:  ????????(????)=????/????2????????????????????????=???? .
+
+n=8
+```{r}
+x <- rgamma(8, 1, 1/3)
+n <- length(x)
+
+sqrt(1/((1/3)^2))
+```
+
+(b) Generate  ????=200  bootstrap samples from the above sample.
+
+```{r}
+B <- 200
+B.1 <- replicate(B, sample(x,n,replace = TRUE))
+dim(B.1)
+
+```
+(c) Calculate the MLE of  ????  for the original sample. Denote this as  ????^ . Then, calculate the MLE of  ????  for each bootstrap sample. Denote this as  ????^??????? , for  ????=1,...,???? . Avoid loops! (HINT: use the apply() function.)
+```{r}
+se = sqrt((n-1)/n)*apply(B.1,2,sd); hist(se);
+sqrt((n-1)/n)*sd(x)
+```
+
+
+```{r}
+q = as.numeric(quantile(se,c(0.05,0.95)));
+CI = c(2*sqrt((n-1)/n)*sd(x) - q[2], 2*sqrt((n-1)/n)*sd(x) - q[1]); CI
+```
+```{r}
+#We are 90% confident that the theta will be in in the interval (1.2079, 2.0368)
+```
+
+#Problem 4
+
+```{r}
+x<-c(40,35,40,0,0,40,50,10)
+x<-as.matrix(x)
+n<-length(x)
+se = sqrt((n-1)/n)*apply(x,2,sd)
+
+se
+```
+
+```{r}
+
+```
+
+```{r}
+b=500
+bs =  replicate(500, sample(x,n,replace = TRUE))
+
+se = sqrt((n-1)/n)*apply(bs,2,sd)
+
+hist(se)
+```
+```{r}
+
+```
+
+

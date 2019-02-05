@@ -1,0 +1,210 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+
+```
+
+
+Problem B.1
+
+
+```{r}
+# random variables from gamma distribution
+set.seed(1)
+n<-8
+alpha<-1
+beta<-3
+rsg1<-rgamma(n,alpha,scale=beta)
+
+#standard deviation
+sd(rsg1)
+
+
+```
+
+(c) Generate  B=200  bootstrap samples from the above sample. Print the dimension, and articulate what each row/column represents. Avoid loops! 
+
+```{r}
+# generating 200 bootsrapping samples out of gamma distribution
+B=200
+bs=replicate(B,sample(rsg1,n,replace=TRUE));
+dim(bs)
+#Each column represent a bootstrap sample which can be used to estimate the thetastarhat which is approximating the Thetahat which is in turn the estimate of the true population parameter.
+#Here are total 8 rows and 200 columns.     
+```
+
+
+
+
+
+
+```{r}
+LLab <- function(pars,X){
+# log likelihood for Gamma(alpha,scale=beta)
+# X is data
+alpha <- pars[1]
+beta <- pars[2]
+-sum(dgamma(X,alpha,scale=beta,log=TRUE))
+}
+
+
+```
+
+
+
+
+```{r}
+pars<-c(4,1)
+
+mle<-optim(pars,LLab,X=rsg1,hessian=TRUE)
+a<-mle$par[1]
+b<-mle$par[2]
+
+
+theta_hat<-sqrt(a/(b^2))
+theta_hat
+```
+```{r}
+
+dim(bs)
+```
+
+
+```{r}
+
+
+```{r}
+pars<-c(4,1)
+mle_1<-vector()
+theta_hat_star<-rep(0,200)
+for (i in 1:200)
+{
+mle_1<-optim(pars,LLab,X=bs[,i],hessian=TRUE)
+a<-mle_1$par[1]
+b<-mle_1$par[2]
+theta_hat_star[i]<-sqrt(a/(b^2))
+}
+
+#thetahatstar1[i]<-apply(X=bs[,i],MARGIN=2,FUN=mle)
+
+```
+
+
+
+```{r}
+quantile(theta_hat_star,c(0.05,0.95))
+```
+
+
+
+```{r}
+n<-20
+u<-2
+sigma_2<-1
+sigma<-sqrt(sigma_2)
+rnorm1<-rnorm(n,mean=u,sd=sigma)
+sd_sample<-sd(rnorm1)
+mean_sample<-mean(rnorm1)
+
+
+
+```{r}
+B<-500
+bs<-replicate(B,sample(rnorm1,n,replace=TRUE))
+
+```
+
+```{r}
+
+col_mean<-colMeans(bs)
+col_value<-col_mean^2
+```
+
+
+
+```{r}
+x_bar_2<-mean_sample^2
+Bias_sample<-mean(col_value)-x_bar_2
+Bias_sample
+```
+
+```{r}
+Bias_original<-sd_sample^2/20
+Bias_original
+```
+
+(e) Compute an estimate of the variance:
+
+
+
+```{r}
+var_value<-rep(0,B)
+theta_bar<-mean(col_value)
+for (i in  1:B)
+{
+  var_value[i]<-(col_value[i]-theta_bar)^2
+}
+
+```
+
+```{r}
+var_final<-sum(var_value)/(B-1)
+var_final
+```
+
+```{r}
+sd_sample
+```
+
+
+```{r}
+install.packages("MASS")
+```
+
+```{r}
+library(MASS)
+```
+
+```{r}
+
+head(Animals)
+
+```
+
+```{r}
+
+a<-Animals
+B<-200
+corr<-rep(0,200)
+for (i in 1:B)
+{
+d<-a[sample(nrow(a), 3), ]
+corr[i]<-cor(d$body,d$brain)  
+}
+
+```
+
+
+
+
+
+```{r}
+quantile(corr,c(0.025,0.975))
+```
+
